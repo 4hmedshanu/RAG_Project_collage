@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete element from project &apos;Documind_At&apos;&#x0D;&#x0A;- Original project: &apos;Documind_At&apos;&#x0D;&#x0A;- Original element: &apos;com.Documind_Ai.model.USER.java&apos;" description="Delete element" element1="/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.Documind_Ai.model{USER.java" elements="1" flags="589830" id="org.eclipse.jdt.ui.delete" resources="0" stamp="1776370934054" subPackages="false" version="1.0"/>
+</session>

@@ -1,0 +1,208 @@
+:root {
+  /* Brand Colors from Landing Page */
+  --primary: #ec5b13;
+  --primary-dark: #d55211;
+  --primary-light: rgba(236, 91, 19, 0.1);
+  
+  /* Light Theme (Default Fallback) */
+  --bg-main: #f8f6f6;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --border-color: #e2e8f0;
+  --card-bg: rgba(255, 255, 255, 0.5);
+}
+
+/* Dark Theme Variables */
+.dark {
+  --bg-main: #0B0B0B;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-color: rgba(236, 91, 19, 0.2);
+  --card-bg: rgba(236, 91, 19, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+.app-body {
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text-main);
+  background-color: var(--bg-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Background Mesh from Landing Page */
+.bg-mesh {
+  background-image: radial-gradient(at 0% 0%, rgba(236, 91, 19, 0.15) 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, rgba(236, 91, 19, 0.1) 0px, transparent 50%);
+}
+
+/* Layout Containers */
+.main-container {
+  margin: 0 auto;
+  max-width: 56rem; /* max-w-4xl */
+  padding: 2rem 1.5rem; /* py-8 px-6 */
+}
+
+/* Header Section */
+.header-section {
+  margin-bottom: 2.5rem; /* mb-10 */
+}
+
+.back-link {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.back-link:hover {
+  color: var(--primary);
+}
+
+.page-title {
+  margin-top: 0.5rem;
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  background: linear-gradient(to right, #ffffff, #ffedd5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.page-description {
+  margin-top: 0.5rem;
+  line-height: 1.625;
+  color: var(--text-muted);
+}
+
+/* Support Grid */
+.support-grid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .support-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.support-card {
+  display: block;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  padding: 1rem;
+  transition: all 0.15s ease;
+}
+
+.support-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 10px 15px -3px rgba(236, 91, 19, 0.1), 0 4px 6px -2px rgba(236, 91, 19, 0.05);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.card-desc {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* Support Form */
+.support-form {
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  padding: 1.5rem;
+}
+
+.form-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.form-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-main);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  outline: none;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.form-input {
+  margin-top: 1rem;
+}
+
+.form-textarea {
+  margin-top: 0.75rem;
+  resize: vertical;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.btn-primary {
+  margin-top: 1rem;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  box-shadow: 0 10px 15px -3px rgba(236, 91, 19, 0.2);
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 20px 25px -5px rgba(236, 91, 19, 0.3);
+}
+
+/* Utilities */
+.success-message {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #10b981; /* emerald-400 */
+}
+
+.hidden {
+  display: none !important;
+}

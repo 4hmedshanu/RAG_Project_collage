@@ -1,0 +1,5 @@
+package com.Documind_Ai.model;
+
+public class User {
+
+}

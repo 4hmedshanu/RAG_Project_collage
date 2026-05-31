@@ -1,0 +1,49 @@
+package com.Documind_Ai.controlles;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class pagecontroller {
+	
+	@GetMapping("/")
+    public String home() {
+        return "index"; // index.html
+    }
+
+    @GetMapping("/features")
+    public String features() {
+        return "features"; // features.html
+    }
+
+    @GetMapping("/faq")
+    public String faq() {
+        return "faq"; // faq.html
+    }
+
+    @GetMapping("/pricinglagacy")
+    public String pricing() {
+        return "pricinglagacy"; // pricinglagacy.html
+    }
+
+    @GetMapping("/dashboard")
+    public String dashboard() {
+        return "dashboard"; 
+    }
+
+    @GetMapping("/about")
+    public String about() {
+        return "about"; // about.html
+    }
+
+    @GetMapping("/settinglagacy")
+    public String settings() {
+        return "settinglagacy"; // settinglagacy.html
+    }
+
+    @GetMapping("/loginpage")
+    public String loginpage() {
+        return "loginpage"; // signup.html
+    }
+
+}

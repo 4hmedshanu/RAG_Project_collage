@@ -1,0 +1,40 @@
+package com.Documind_Ai.controlles;
+
+import java.time.LocalDateTime;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.Documind_Ai.model.User;
+import com.Documind_Ai.repo.BackendAi;
+
+@Controller
+public class homecontrolles {
+	
+	@Autowired
+	BackendAi backai;
+
+	
+	
+	@GetMapping("/signup")
+	public String signup( ) {
+		
+		return "signup";
+	}
+	
+	
+	@ResponseBody
+	@GetMapping("/submit")
+	public String signupsubmit(@ModelAttribute User user) {
+		user.setRole("USER");
+		user.setCreatedAt(LocalDateTime.now());
+		this.backai.savedata(user);
+		return user.getEmail();
+	}
+	
+}
