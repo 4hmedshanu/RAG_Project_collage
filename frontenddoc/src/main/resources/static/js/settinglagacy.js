@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeChunkingParamsState = {};
 
     const els = {
+        userIdInput: document.getElementById("user-id-input"),
+        userIdDisplay: document.getElementById("user-id-display"),
         embedModel: document.getElementById("embed-model"),
         chunkStrategy: document.getElementById("chunk-strategy"),
         chunkParams: document.getElementById("chunk-params-container"),
@@ -58,6 +60,29 @@ document.addEventListener("DOMContentLoaded", () => {
         jsonPreview: document.getElementById("json-preview")
     };
 
+    // Active schema loaded from backend (fallback to local CONFIG_SCHEMA)
+    let BACKEND_SCHEMA = null;
+
+    // User context
+    let USER_ID = localStorage.getItem("user_id") || "user_1";
+
+    function getCurrentUserId() {
+        return (els.userIdInput?.value || USER_ID || "user_1").trim() || "user_1";
+    }
+
+    function setUserId(id) {
+        if (!id || id.trim() === "") return false;
+        USER_ID = id.trim();
+        localStorage.setItem("user_id", USER_ID);
+        if (els.userIdDisplay) els.userIdDisplay.textContent = USER_ID;
+        if (els.userIdInput) els.userIdInput.value = USER_ID;
+        return true;
+    }
+
+    function buildConfigUrl(path) {
+        return `${API_BASE}${path}`;
+    }
+
     function showToast(msg, isError = false) {
         const toast = document.getElementById("toast");
         toast.textContent = msg;
@@ -67,27 +92,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function initStaticOptions() {
-        Object.keys(CONFIG_SCHEMA.embedding_models).forEach(k => els.embedModel.add(new Option(k, k)));
-        Object.keys(CONFIG_SCHEMA.llm_providers).forEach(k => els.llmProvider.add(new Option(k.toUpperCase(), k)));
-        
-        els.kCand.min = CONFIG_SCHEMA.retriever.k_candidates.min;
-        els.kCand.max = CONFIG_SCHEMA.retriever.k_candidates.max;
-        els.topN.min = CONFIG_SCHEMA.retriever.top_n_rerank.min;
-        els.topN.max = CONFIG_SCHEMA.retriever.top_n_rerank.max;
-        els.bm25.min = CONFIG_SCHEMA.retriever.bm25_weight.min;
-        els.bm25.max = CONFIG_SCHEMA.retriever.bm25_weight.max;
+        const source = BACKEND_SCHEMA || CONFIG_SCHEMA;
+        if (!source) return;
+        els.embedModel.innerHTML = "";
+        Object.keys(source.embedding_models || {}).forEach(k => els.embedModel.add(new Option(k, k)));
+        els.llmProvider.innerHTML = "";
+        Object.keys(source.llm_providers || {}).forEach(k => els.llmProvider.add(new Option(k.toUpperCase(), k)));
+
+        const retr = source.retriever || source.retriever_options || CONFIG_SCHEMA.retriever;
+        if (retr && els.kCand) {
+            els.kCand.min = retr.k_candidates?.min ?? retr.k_candidates?.default ?? 3;
+            els.kCand.max = retr.k_candidates?.max ?? 30;
+        }
+        if (retr && els.topN) {
+            els.topN.min = retr.top_n_rerank?.min ?? 1;
+            els.topN.max = retr.top_n_rerank?.max ?? 10;
+        }
+        if (retr && els.bm25) {
+            els.bm25.min = retr.bm25_weight?.min ?? 0;
+            els.bm25.max = retr.bm25_weight?.max ?? 1;
+        }
     }
 
     function updateEmbedMeta() {
-        const meta = CONFIG_SCHEMA.embedding_models[els.embedModel.value];
-        document.getElementById("meta-dim").textContent = meta.dimensions;
-        document.getElementById("meta-size").textContent = meta.size;
+        const source = BACKEND_SCHEMA || CONFIG_SCHEMA;
+        const meta = (source.embedding_models || {})[els.embedModel.value] || {};
+        document.getElementById("meta-dim").textContent = meta.dimensions || "-";
+        document.getElementById("meta-size").textContent = meta.size || "-";
         updateLivePreview();
     }
 
     function buildChunkingParams() {
         const strategy = els.chunkStrategy.value;
-        const params = CONFIG_SCHEMA.chunking_strategies[strategy].params;
+        const source = BACKEND_SCHEMA || CONFIG_SCHEMA;
+        const params = ((source.chunking_strategies || {})[strategy] || {}).params || {};
         els.chunkParams.innerHTML = "";
         activeChunkingParamsState = {};
 
@@ -134,14 +172,39 @@ document.addEventListener("DOMContentLoaded", () => {
         updateLivePreview();
     }
 
-    function updateProvider() {
-        const provider = els.llmProvider.value;
-        const config = CONFIG_SCHEMA.llm_providers[provider];
-        
+    function getProviderModelsFromSchema(provider) {
+        const source = BACKEND_SCHEMA || CONFIG_SCHEMA;
+        const providerConfig = source?.llm_providers?.[provider];
+        const models = providerConfig?.models;
+        if (Array.isArray(models)) return models;
+        if (models && typeof models === "object") return Object.keys(models);
+        return [];
+    }
+
+    function setLlmModelOptions(models, preferredModel) {
+        if (!els.llmModel) return;
+        const previous = preferredModel || els.llmModel.value;
         els.llmModel.innerHTML = "";
-        config.models.forEach(m => els.llmModel.add(new Option(m, m)));
-        
+        models.forEach((model) => {
+            els.llmModel.add(new Option(model, model));
+        });
+        if (previous && models.includes(previous)) {
+            els.llmModel.value = previous;
+        } else if (models.length > 0) {
+            els.llmModel.value = models[0];
+        }
+    }
+
+    async function updateProvider(preferredModel = null) {
+        const provider = els.llmProvider.value;
+
+        // Always update immediately from local/backend schema so UI matches selected provider tier.
+        const schemaModels = getProviderModelsFromSchema(provider);
+        setLlmModelOptions(schemaModels, preferredModel);
         updateLivePreview();
+
+        // Then refine from backend if response aligns with selected provider.
+        await fetchAvailableModels(provider, preferredModel);
     }
 
     function updateSliders() {
@@ -181,19 +244,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function loadDefaults() {
-        els.embedModel.value = "bge-large";
-        els.chunkStrategy.value = "recursive";
-        els.llmProvider.value = "groq";
-        els.multiQuery.checked = true;
-        els.reranker.checked = true;
-        els.kCand.value = 10;
-        els.topN.value = 3;
-        els.bm25.value = 0.4;
-        
+        const defaults = (BACKEND_SCHEMA && BACKEND_SCHEMA.default_config) || CONFIG_SCHEMA.default_config || {
+            embedding_model: "bge-large",
+            chunking_strategy: "recursive",
+            llm_provider: "groq",
+            llm_model: "llama-3.3-70b-versatile",
+            retriever: { k_candidates: 10, top_n_rerank: 3, bm25_weight: 0.4, use_multi_query: true, use_reranker: true }
+        };
+
+        els.embedModel.value = defaults.embedding_model;
+        els.chunkStrategy.value = defaults.chunking_strategy;
+        els.llmProvider.value = defaults.llm_provider;
+        els.multiQuery.checked = defaults.retriever?.use_multi_query ?? true;
+        els.reranker.checked = defaults.retriever?.use_reranker ?? true;
+        els.kCand.value = defaults.retriever?.k_candidates ?? 10;
+        els.topN.value = defaults.retriever?.top_n_rerank ?? 3;
+        els.bm25.value = defaults.retriever?.bm25_weight ?? 0.4;
+
         updateEmbedMeta();
         buildChunkingParams();
-        updateProvider();
-        els.llmModel.value = "llama-3.3-70b-versatile";
+        // Provider change will fetch available models and set llmModel when ready
+        updateProvider(defaults.llm_model);
         updateSliders();
     }
 
@@ -213,22 +284,142 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast("JSON payload copied to clipboard.");
     });
 
-    document.getElementById("btn-reset-defaults").addEventListener("click", loadDefaults);
+    // Wire reset and save to backend endpoints using active user id
+    document.getElementById("btn-reset-defaults").addEventListener("click", async () => {
+        const userId = getCurrentUserId();
+        if (!confirm(`Reset all settings to defaults for ${userId}?`)) return;
+        try {
+            const res = await fetch(buildConfigUrl(`/config/${encodeURIComponent(userId)}/reset`), { method: "POST" });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            showToast(`Configuration reset for ${userId}`);
+            // reload user config
+            await loadUserConfig();
+        } catch (err) {
+            showToast("Failed to reset configuration.", true);
+        }
+    });
 
     document.getElementById("btn-save-config").addEventListener("click", async () => {
+        const userId = getCurrentUserId();
         const payload = generatePayload();
         try {
-            const res = await fetch(`${API_BASE}/config/update`, {
-                method: "POST",
+            const res = await fetch(buildConfigUrl(`/config/${encodeURIComponent(userId)}`), {
+                method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
-            if(!res.ok) throw new Error("Backend rejected payload");
-            showToast("Configuration successfully deployed.");
+            if(!res.ok) {
+                const err = await res.json().catch(() => null);
+                throw new Error(err?.detail || `HTTP ${res.status}`);
+            }
+            showToast(`Configuration saved for ${userId}`);
         } catch (err) {
-            showToast("Failed to deploy to backend.", true);
+            showToast("Failed to save configuration.", true);
         }
     });
+
+    // User ID change handling
+    if (els.userIdInput) {
+        els.userIdInput.addEventListener("change", async () => {
+            const newId = els.userIdInput.value.trim();
+            if (!newId) return;
+            setUserId(newId);
+            await loadUserConfig();
+        });
+    }
+
+    // Fetch options from backend (preferred) then initialize UI
+    async function fetchConfigOptions() {
+        try {
+            const res = await fetch(buildConfigUrl("/config/options"), { signal: AbortSignal.timeout(5000) });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            BACKEND_SCHEMA = data;
+            return data;
+        } catch (err) {
+            console.warn("Failed to fetch options from backend, using local schema", err);
+            BACKEND_SCHEMA = null;
+            return null;
+        }
+    }
+
+    async function loadUserConfig() {
+        const userId = getCurrentUserId();
+        try {
+            const res = await fetch(buildConfigUrl(`/config/${encodeURIComponent(userId)}`), { signal: AbortSignal.timeout(5000) });
+            if (!res.ok) {
+                if (res.status === 404) {
+                    showToast(`No saved config for ${userId}. Using defaults.`);
+                    loadDefaults();
+                    return null;
+                }
+                throw new Error(`HTTP ${res.status}`);
+            }
+            const body = await res.json();
+            // API returns {status, user_id, config}
+            const config = body.config || body;
+            if (!config) return null;
+
+            setUserId(userId);
+
+            if (config.embedding_model && els.embedModel) els.embedModel.value = config.embedding_model;
+            if (config.chunking_strategy && els.chunkStrategy) {
+                els.chunkStrategy.value = config.chunking_strategy;
+                buildChunkingParams();
+                if (config.chunking_params) {
+                    Object.entries(config.chunking_params).forEach(([k, v]) => {
+                        const el = els.chunkParams.querySelector(`[data-param="${k}"]`);
+                        if (el) el.value = v;
+                    });
+                }
+            }
+            if (config.llm_provider && els.llmProvider) {
+                els.llmProvider.value = config.llm_provider;
+                await updateProvider(config.llm_model);
+            }
+            if (config.retriever) {
+                if (els.multiQuery) els.multiQuery.checked = config.retriever.use_multi_query ?? true;
+                if (els.reranker) els.reranker.checked = config.retriever.use_reranker ?? true;
+                if (els.kCand) els.kCand.value = config.retriever.k_candidates ?? els.kCand.value;
+                if (els.topN) els.topN.value = config.retriever.top_n_rerank ?? els.topN.value;
+                if (els.bm25) els.bm25.value = config.retriever.bm25_weight ?? els.bm25.value;
+                updateSliders();
+            }
+            updateLivePreview();
+            return config;
+        } catch (err) {
+            console.error("Failed to load user config", err);
+            showToast("Failed to load user config", true);
+            return null;
+        }
+    }
+
+    async function fetchAvailableModels(requestedProvider = null, preferredModel = null) {
+        const userId = getCurrentUserId();
+        const provider = requestedProvider || els.llmProvider?.value;
+        if (!provider) return;
+        try {
+            const url = new URL(buildConfigUrl(`/config/${encodeURIComponent(userId)}/llm-models`));
+            url.searchParams.set("provider", provider);
+            const res = await fetch(url.toString(), { signal: AbortSignal.timeout(5000) });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            // Ignore stale backend responses that don't match current provider selection.
+            if (data.provider && data.provider !== provider) {
+                return null;
+            }
+
+            // Backend returns available_models map (or models array in some variants).
+            const models = Array.isArray(data.models) ? data.models : Object.keys(data.available_models || {});
+            setLlmModelOptions(models, preferredModel);
+            updateLivePreview();
+            return data;
+        } catch (err) {
+            console.warn("Failed to fetch available models", err);
+            return null;
+        }
+    }
 
     // Boot
     initStaticOptions();

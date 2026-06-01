@@ -26,7 +26,12 @@ public class pagecontroller {
     public String features() {
         return "features"; // features.html
     }
-
+   
+    
+    @GetMapping("/doclib")
+    public String doclib() {
+        return "doclib"; // features.html
+    }
     @GetMapping("/faq")
     public String faq() {
         return "faq"; // faq.html
@@ -34,6 +39,12 @@ public class pagecontroller {
 
     @GetMapping("/pricinglagacy")
     public String pricing() {
+        return "pricinglagacy"; // pricinglagacy.html
+    }
+    
+    
+    @GetMapping("/pricing")
+    public String pricinging() {
         return "pricinglagacy"; // pricinglagacy.html
     }
 
@@ -60,7 +71,7 @@ public class pagecontroller {
     public String loginpage() {
         return "loginpage"; // signup.html
     }
-    
+  
     @GetMapping("/profile")
     public String profilepage(Principal prin, Model mo) {
     	String email =prin.getName();
@@ -69,9 +80,21 @@ public class pagecontroller {
         return "profile"; 
     }
     
+    
     @GetMapping("/models")
     public String modelspage() {
         return "models"; // s
+    }
+    
+    @GetMapping("/policies")
+    public String policiespage() {
+        return "policies"; // s
+    }
+    
+    
+    @GetMapping("/support")
+    public String supportpage() {
+        return "support"; // s
     }
     
     

@@ -30,7 +30,10 @@ public class websecrity {
                     "/imag/**",
                     "/landingpage",
                     "/",
-                    "/faq"
+                    "/faq",
+                    "/submiting",
+                    "/pricinglagacy",
+                    "/features"
                 ).permitAll()
                 .requestMatchers("/**").hasRole("USER")
                 .anyRequest().authenticated()

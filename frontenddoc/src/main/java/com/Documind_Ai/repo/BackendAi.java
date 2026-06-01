@@ -26,4 +26,6 @@ public interface BackendAi {
 	@GetMapping("/findByUsername")
 	public User findByUsername(@RequestParam("email") String email);
 	
+	
+	
 }

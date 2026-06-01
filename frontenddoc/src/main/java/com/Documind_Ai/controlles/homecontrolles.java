@@ -1,6 +1,7 @@
 package com.Documind_Ai.controlles;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,12 +13,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.Documind_Ai.model.User;
 import com.Documind_Ai.repo.BackendAi;
+import com.Documind_Ai.repo.aiservicesbackend;
 
 @Controller
 public class homecontrolles {
 	
 	@Autowired
 	BackendAi backai;
+	
+	@Autowired
+	aiservicesbackend aiservice;
 
 	
 	
@@ -28,13 +33,21 @@ public class homecontrolles {
 	}
 	
 	
-	@ResponseBody
-	@GetMapping("/submit")
+	@GetMapping("/submiting")
 	public String signupsubmit(@ModelAttribute User user) {
 		user.setRole("USER");
 		user.setCreatedAt(LocalDateTime.now());
 		this.backai.savedata(user);
-		return user.getEmail();
+		return "redirect:/loginpage";
 	}
+	
+	
+	@ResponseBody
+    @GetMapping("/health")
+    Map<String, Object> health(){
+    	return this.aiservice.healthCheck();
+    			}
+	
+	
 	
 }
