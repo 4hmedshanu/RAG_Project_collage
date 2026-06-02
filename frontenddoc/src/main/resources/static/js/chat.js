@@ -344,7 +344,20 @@ function appendBotBubble(text, sources = [], status = 'ok', processedQ = null) {
   const bubbleClass = status === 'blocked' ? 'bubble-bot bubble-blocked' : status === 'error' ? 'bubble-bot bubble-error' : 'bubble-bot';
   const prefix = status === 'blocked' ? '🚫 ' : status === 'error' ? '⚠ ' : '';
 
-  row.innerHTML = `<div class="msg-avatar avatar-bot">AI</div><div class="msg-bubble ${bubbleClass}"><p>${prefix}${escHtml(text)}</p></div>`;
+  row.innerHTML = `
+  <div class="msg-avatar avatar-bot">AI</div>
+
+  <div class="msg-bubble ${bubbleClass}">
+      <p>${prefix}${escHtml(text)}</p>
+
+      <div class="msg-actions">
+          <button class="audio-btn"
+                  onclick="speakTextFromButton(this)"
+                  title="Listen">
+              🔊
+          </button>
+      </div>
+  </div>`;
   document.getElementById('log').appendChild(row);
   if (sources.length) attachSources(row.querySelector('.msg-bubble'), sources, processedQ);
   scrollLog();
@@ -353,7 +366,20 @@ function appendBotBubble(text, sources = [], status = 'ok', processedQ = null) {
 function createStreamingBubble() {
   const row = document.createElement('div');
   row.className = 'msg-row';
-  row.innerHTML = `<div class="msg-avatar avatar-bot">AI</div><div class="msg-bubble bubble-bot"><p class="streaming-cursor"></p></div>`;
+  row.innerHTML = `
+  <div class="msg-avatar avatar-bot">AI</div>
+
+  <div class="msg-bubble bubble-bot">
+      <p class="streaming-cursor"></p>
+
+      <div class="msg-actions">
+          <button class="audio-btn"
+                  onclick="speakTextFromButton(this)"
+                  title="Listen">
+              🔊
+          </button>
+      </div>
+  </div>`;
   document.getElementById('log').appendChild(row);
   scrollLog();
   return row.querySelector('.msg-bubble');

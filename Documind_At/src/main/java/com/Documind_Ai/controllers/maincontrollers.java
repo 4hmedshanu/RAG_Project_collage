@@ -27,4 +27,8 @@ public class maincontrollers {
 	public User findByUsername(@RequestParam("email") String email) {
 		return this.servicesuser.findByUsername(email);
 	}
+	
+	
+	
+	
 }

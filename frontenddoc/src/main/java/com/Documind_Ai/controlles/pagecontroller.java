@@ -29,7 +29,10 @@ public class pagecontroller {
    
     
     @GetMapping("/doclib")
-    public String doclib() {
+    public String doclib(Principal prin , Model mo) {
+    	String email =prin.getName();
+    	User  user=this.backendrepo.findByUsername(email);
+    	mo.addAttribute("u",user);
         return "doclib"; // features.html
     }
     @GetMapping("/faq")

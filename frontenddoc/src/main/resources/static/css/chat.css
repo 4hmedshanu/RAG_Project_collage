@@ -1073,6 +1073,29 @@ input, textarea, select { font-family: inherit; }
   }
 }
 
+
+
+.msg-actions{
+    margin-top:10px;
+}
+
+.audio-btn{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:6px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.audio-btn:hover{
+    opacity:.9;
+}
+
+
+
+
 .brand-logo { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; flex-shrink: 0; text-decoration: none; color: inherit; }
 .brand-icon {
     width: 2.5rem; height: 2.50rem;

@@ -1,0 +1,29 @@
+spring.application.name=Documind_At
+
+server.port=8081
+
+# ✅ Database Configuration (MySQL)
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/documind_db
+spring.datasource.username=root
+spring.datasource.password=shanu03
+
+# ✅ JPA / Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# ✅ Optional (Better Performance)
+#spring.jpa.properties.hibernate.format_sql=true
+
+# ✅ File Upload (Important for your project)
+#spring.servlet.multipart.max-file-size=50MB
+#spring.servlet.multipart.max-request-size=50MB
+
+# ✅ Logging (Optional)
+#logging.level.org.springframework=INFO
+
+# OpenAI main API key (works for all models: chat, embedding, speech, etc.)
+#spring.ai.openai.api-key=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
+
+spring.ai.openai.api-key=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

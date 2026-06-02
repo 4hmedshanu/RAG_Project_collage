@@ -1,0 +1,9 @@
+spring.application.name=frontenddoc
+
+
+spring.security.oauth2.client.registration.google.client-id=860489705723-ql78sual3274o1al79cg3i572021phl2.apps.googleusercontent.com
+
+spring.security.oauth2.client.registration.google.client-secret=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
+
+spring.security.oauth2.client.registration.google.scope=email,profile
+

@@ -58,6 +58,7 @@
             <option value="groq">Groq — llama-3.3-70b</option>
             <option value="openai">OpenAI — gpt-4o-mini</option>
             <option value="anthropic">Anthropic — Claude</option>
+            <option value="chatwithai">Chat-With-AI</option>
           </select>
           <button class="btn-apply" id="btn-switch-provider" onclick="switchProvider()">Apply Provider</button>
         </div>
@@ -65,7 +66,7 @@
         <div class="left-section">
           <p class="left-label">SESSION</p>
           <div class="session-info">
-            <div class="session-row"><span>User ID</span><strong id="display-uid" ><samp>user_3</samp></strong></div>
+            <div class="session-row"><span>User ID</span><strong id="display-uid" ><samp th:text="${u.userId}">user_3</samp></strong></div>
             <div class="session-row"><span>Turns</span><strong id="display-turns">0</strong></div>
             <div class="session-row"><span>Memory</span><strong>Last 5</strong></div>
           </div>
@@ -209,7 +210,8 @@
       </div>
     </aside>
   </main>
-
   <script src="js/chat.js"></script>
+ <script src="js/chatwithai.js"></script>
+  
 </body>
 </html>

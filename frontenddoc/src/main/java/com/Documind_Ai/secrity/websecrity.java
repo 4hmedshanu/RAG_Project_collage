@@ -15,6 +15,9 @@ public class websecrity {
 	
 	@Autowired
 	CustomUserDetailsService customUserDetailsService;
+	
+	@Autowired
+	private CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,7 +38,7 @@ public class websecrity {
                     "/pricinglagacy",
                     "/features"
                 ).permitAll()
-                .requestMatchers("/**").hasRole("USER")
+//                .requestMatchers("/**").hasRole("USER")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -46,6 +49,13 @@ public class websecrity {
                     .defaultSuccessUrl("/dashboard", true)
                     .failureUrl("/loginpage?error=true")
             )
+            .oauth2Login(oauth->oauth
+            		.loginPage("/loginpage")
+                    .userInfoEndpoint(userInfo ->
+                        userInfo.userService(customOAuth2UserService)
+                    )
+                    .defaultSuccessUrl("/dashboard", true)
+            		)
             .logout(logout -> logout
                 .logoutSuccessUrl("/loginpage?logout=true")
                 .permitAll()
