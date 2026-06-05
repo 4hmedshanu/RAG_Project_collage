@@ -66,8 +66,11 @@ public class pagecontroller {
     }
 
     @GetMapping("/settinglagacy")
-    public String settings() {
-        return "settinglagacy"; // settinglagacy.html
+    public String settings(Principal prin, Model mo) {
+        String email = prin.getName();
+        User user = this.backendrepo.findByUsername(email);
+        mo.addAttribute("u", user);
+        return "settinglagacy"; 
     }
 
     @GetMapping("/loginpage")

@@ -10,8 +10,9 @@ const API = (() => {
   return globalBase || queryBase || storageBase || 'http://localhost:8000';
 })();
 
-let userId = 'user_3';
-let useStream = true;
+// FIX: Do not hardcode 'user_3'. Wait for DOM to read the template-injected value, or fallback.
+let userId = ''; 
+let useStream = false;
 let turnCount = 0;
 let historyItems = [];
 let allDocs = [];
@@ -84,6 +85,7 @@ function switchTab(name, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(`tab-${name}`)?.classList.add('active');
   btn?.classList.add('active');
+  
   if (name === 'documents') loadDocuments();
   if (name === 'eval') loadEvalQuestions();
   if (name === 'history') renderHistory();
@@ -97,10 +99,17 @@ function onUidChange() {
   loadEvalQuestions();
 }
 
-
-
+// FIX: Added HTTP status checking so frontend doesn't crash on backend 500/404 errors
 async function fetchJson(path, options) {
   const response = await fetch(apiPath(path), options);
+  if (!response.ok) {
+    let errorMsg = `HTTP error ${response.status}`;
+    try {
+      const errData = await response.json();
+      errorMsg = errData.detail || errData.message || errorMsg;
+    } catch (e) {}
+    throw new Error(errorMsg);
+  }
   return response.json();
 }
 
@@ -118,7 +127,8 @@ async function loadServiceInfo() {
 
 async function checkHealth() {
   try {
-    const d = await fetchJson('/health');
+	// FIX: Pass the active user ID so the backend checks the correct configuration
+	const d = await fetchJson(`/health?user_id=${encodeURIComponent(userId)}`);
     const ollOk = d.ollama_running;
     setDot('dot-ollama', ollOk === null ? 'amber' : ollOk ? 'green' : 'red');
     document.getElementById('val-ollama').textContent = ollOk === null ? 'N/A' : ollOk ? 'Running' : 'Down';
@@ -182,8 +192,8 @@ async function switchProvider() {
     }
     await loadProvider();
     await checkHealth();
-  } catch {
-    toast('Failed to switch provider');
+  } catch (err) {
+    toast(`Failed to switch provider: ${err.message}`);
   }
 }
 
@@ -314,13 +324,13 @@ async function uploadFiles(files) {
     try {
       const r = await fetch(apiPath('/upload'), { method: 'POST', body: form });
       const d = await r.json();
-      if (d.status === 'success') {
+      if (r.ok && d.status === 'success') {
         toast(`✓ ${file.name} — ${d.chunks_created} chunks`);
       } else {
         toast(`✗ ${file.name}: ${d.message || d.detail || 'Upload failed'}`);
       }
     } catch {
-      toast(`✗ ${file.name}: Upload failed`);
+      toast(`✗ ${file.name}: Network error`);
     }
   }
 
@@ -346,20 +356,15 @@ function appendBotBubble(text, sources = [], status = 'ok', processedQ = null) {
 
   row.innerHTML = `
   <div class="msg-avatar avatar-bot">AI</div>
-
   <div class="msg-bubble ${bubbleClass}">
       <p>${prefix}${escHtml(text)}</p>
-
       <div class="msg-actions">
-          <button class="audio-btn"
-                  onclick="speakTextFromButton(this)"
-                  title="Listen">
-              🔊
-          </button>
+          <button class="audio-btn" onclick="speakTextFromButton(this)" title="Listen">🔊</button>
       </div>
   </div>`;
+  
   document.getElementById('log').appendChild(row);
-  if (sources.length) attachSources(row.querySelector('.msg-bubble'), sources, processedQ);
+  if (sources && sources.length) attachSources(row.querySelector('.msg-bubble'), sources, processedQ);
   scrollLog();
 }
 
@@ -368,16 +373,10 @@ function createStreamingBubble() {
   row.className = 'msg-row';
   row.innerHTML = `
   <div class="msg-avatar avatar-bot">AI</div>
-
   <div class="msg-bubble bubble-bot">
       <p class="streaming-cursor"></p>
-
       <div class="msg-actions">
-          <button class="audio-btn"
-                  onclick="speakTextFromButton(this)"
-                  title="Listen">
-              🔊
-          </button>
+          <button class="audio-btn" onclick="speakTextFromButton(this)" title="Listen">🔊</button>
       </div>
   </div>`;
   document.getElementById('log').appendChild(row);
@@ -455,15 +454,15 @@ async function blockingAnswer(query) {
 
     if (d.status === 'blocked') {
       appendBotBubble(d.answer || d.message || 'Blocked by guardrails.', [], 'blocked');
-    } else if (d.status === 'error') {
-      appendBotBubble('Error: ' + (d.answer || d.detail || 'Unknown error'), [], 'error');
+    } else if (!r.ok || d.status === 'error') {
+      appendBotBubble('Error: ' + (d.answer || d.detail || d.message || 'Unknown error'), [], 'error');
     } else {
       appendBotBubble(d.answer || d.message || '', d.sources || [], 'ok', d.processed_query);
       pushHistory(query, d.answer || '');
     }
-  } catch {
+  } catch (err) {
     typing.remove();
-    appendBotBubble('Connection error. Is the API running?', [], 'error');
+    appendBotBubble(`Connection error: ${err.message}`, [], 'error');
   }
 }
 
@@ -479,6 +478,10 @@ async function streamAnswer(query) {
 
   try {
     const response = await fetch(url, { signal: activeStream.signal });
+    if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
+    }
+    
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -489,6 +492,7 @@ async function streamAnswer(query) {
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
+      // Keep the last incomplete chunk in the buffer
       buffer = lines.pop();
 
       for (const line of lines) {
@@ -498,12 +502,15 @@ async function streamAnswer(query) {
           handleStreamEvent(ev);
           if (ev.event === 'token') fullAnswer += ev.token;
           if (ev.event === 'done') sources = ev.sources || [];
-        } catch {}
+        } catch (e) {
+            // Ignore incomplete JSON chunks until the next iteration appends the rest
+        }
       }
     }
   } catch (err) {
     if (err.name !== 'AbortError' && streamingBubble) {
-      streamingBubble.querySelector('p').textContent = 'Stream error. Try disabling streaming.';
+      streamingBubble.querySelector('p').textContent = `Stream error: ${err.message}. Try disabling streaming.`;
+      streamingBubble.classList.add('bubble-error');
     }
   }
 
@@ -551,7 +558,10 @@ function handleStreamEvent(ev) {
       }
       break;
     case 'error':
-      if (streamingBubble) streamingBubble.querySelector('p').textContent = '⚠ ' + ev.message;
+      if (streamingBubble) {
+        streamingBubble.querySelector('p').textContent = '⚠ ' + ev.message;
+        streamingBubble.classList.add('bubble-error');
+      }
       break;
   }
 }
@@ -785,8 +795,16 @@ document.addEventListener('DOMContentLoaded', () => {
     closeMobileSidebars();
   });
 
+  // FIX: Properly initialize user ID from the Thymeleaf/HTML template value injected by the backend.
+  const uidInput = document.getElementById('user-id-input');
+  if (uidInput && uidInput.value) {
+      userId = uidInput.value.trim();
+  } else {
+      userId = 'user_3'; // fallback
+      if (uidInput) uidInput.value = userId;
+  }
+  
   document.getElementById('display-uid').textContent = userId;
-  document.getElementById('user-id-input').value = userId;
   document.getElementById('val-api').textContent = API;
 
   setEndpointLabel();

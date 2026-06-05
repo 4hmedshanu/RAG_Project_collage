@@ -40,10 +40,10 @@
     
     <header class="site-header">
         <div class="nav-container">
-            <div class="brand-logo" data-alert="Navigating to Home...">
-                        <img src="imag/logo.png" alt="DocuMindAI logo" class="brand-inline-logo" />
-                        <h2 class="brand-text">DocuMindAI</h2>
-                    </div>
+            <div class="brand-logo" onclick="window.location.href='/'" style="cursor: pointer;">
+              <img src="imag/logo.png" alt="DocuMindAI logo" class="brand-inline-logo" />
+              <h2 class="brand-text">DocuMindAI</h2>
+            </div>
 
             <nav class="nav-links">
                 <a href="/">Home</a>
@@ -317,57 +317,48 @@
     </main>
 
     <footer class="site-footer">
-        <div class="container footer-grid">
-            <div class="footer-brand-col">
-                <div class="brand">
-                    <div >
-                        <img src="imag/logo.png" alt="DocuMindAI logo" class="brand-inline-logo small" />
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <div class="footer-logo">
+                            <img src="imag/logo.png" alt="DocuMindAI logo" class="brand-inline-logo small" />
+                            <h2>DocuMindAI</h2>
+                        </div>
+                        <p class="footer-desc">The future of private knowledge management.</p>
                     </div>
-                    <h2>DocuMindAI</h2>
+                    <div class="footer-column">
+                        <h5>Product</h5>
+                        <ul>
+                            <li><a href="/">Home</a></li>
+                            <li><a href="/features">Features</a></li>
+                            <li><a href="/pricinglagacy">Pricing</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h5>Company</h5>
+                        <ul>
+                            <li><a href="/about">About us</a></li>
+                            <li><a href="/support">Careers</a></li>
+                            <li><a href="/support">Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h5>Resources</h5>
+                        <ul>
+                            <li><a href="/faq">FAQ</a></li>
+                            <li><a href="/policies">Policies</a></li>
+                        </ul>
+                    </div>
                 </div>
-                <p>The future of private knowledge management.</p>
-                <div class="social-links">
-                    <a href="#" onclick="alert('Going to Social Link...')"><span class="material-symbols-outlined">public</span></a>
-                    <a href="#" onclick="alert('Going to Social Link...')"><span class="material-symbols-outlined">share</span></a>
-                    <a href="#" onclick="alert('Going to Social Link...')"><span class="material-symbols-outlined">alternate_email</span></a>
+                <div class="footer-bottom">
+                    <p>© 2026 Hybrid RAG Knowledge Assistant. All rights reserved.</p>
+                    <div class="footer-bottom-actions">
+                        <div class="legal-links">
+                            <a href="/policies">Privacy Policy</a>
+                            <a href="/policies">Terms of Service</a>
+                            <a href="/policies">Cookie Policy</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="footer-links">
-                <h5>Product</h5>
-                <ul>
-                     <li><a href="/" >Home</a></li>
-                    <li><a href="/features">Features</a></li>
-                    <li><a href="/pricing">Pricing</a></li>
-                   
-                    <li><a href="/chat" >Chat</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h5>Company</h5>
-                <ul>
-                    <li><a href="/dashboard" >About us</a></li>
-                    <li><a href="/sitemap" >Careers</a></li>
-                    <li><a href="/support" >Contact</a></li>
-                    <li><a href="/settinglagacy" >Settings</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h5>Resources</h5>
-                <ul>
-                    <li><a href="/doclib" >Documentation</a></li>
-                    <li><a href="/dashboard" >Dashboard</a></li>
-                    <li><a href="/policies" >Policies</a></li>
-                 
-            </div>
-        </div>
-        <div class="container footer-bottom">
-            <p>© 2026 Hybrid RAG Knowledge Assistant. All rights reserved.</p>
-            <div class="legal-links">
-                <a href="/policies" >Privacy Policy</a>
-                <a href="/policies" >Terms of Service</a>
-                <a href="/policies" >Cookie Policy</a>
-            </div>
-        </div>
-    </footer>
+            </footer>
 </body>
 </html>
