@@ -35,6 +35,10 @@ public class websecrity {
                     "/",
                     "/faq",
                     "/submiting",
+                    "/generatedOtp",
+                    "/verifyOtp",
+                    "/sussregister",
+                    "/subdata",
                     "/pricinglagacy",
                     "/features"
                 ).permitAll()

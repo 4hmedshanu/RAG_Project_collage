@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocuMindAI | Sign Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/signup.css" />
+  <script src="js/signup.js" defer></script>
+</head>
+<body>
+  <main class="main-container">
+    <section class="signup-card">
+      <div class="signup-info">
+        <a href="/" class="link-back">← Back to Home</a>
+        <h1 class="gradient-heading">Get Started</h1>
+        <p class="description">Create your workspace and start searching your documents with AI-powered answers grounded in source material.</p>
+        
+        <div class="features-list">
+          <div class="feature-item">
+            <span class="check-icon">✓</span>
+            <div>
+              <p class="feature-title">14-day free trial</p>
+              <p class="feature-desc">No credit card required</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="check-icon">✓</span>
+            <div>
+              <p class="feature-title">Unlimited documents</p>
+              <p class="feature-desc">Upload and index as many files as you need</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="check-icon">✓</span>
+            <div>
+              <p class="feature-title">Team collaboration</p>
+              <p class="feature-desc">Invite team members and share workspaces</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-prompt">
+          <p class="login-text">Already have an account?</p>
+          <a href="/loginpage" class="link-brand">Sign In →</a>
+        </div>
+     </div>
+
+<div class="signup-form">
+
+<div class="steps">
+    <div class="step-indicator active">1</div>
+    <div class="step-indicator">2</div>
+</div>
+
+
+   <div id="step1" class="step-content active">
+    <!-- Registration Form Here -->
+     <form id="step1Form">
+        <h2 class="form-title">Create account</h2>
+        
+        <label for="company" class="form-label mt-4">Company name</label>
+        <input name="name"  id="company" type="text" class="form-input" placeholder="Your company"  />
+        
+        <label for="email" class="form-label">Email</label>
+        <input name="email" id="email" type="email" class="form-input"  placeholder="name@company.com" />
+        
+        <label for="password" class="form-label">Password</label>
+        <input name="password" id="password" type="password" class="form-input"  placeholder="••••••••" />
+        
+        <label for="confirm" class="form-label">Confirm password</label>
+        <input id="confirm" type="password" class="form-input" name="" placeholder="••••••••" />
+        
+        <div class="terms-group">
+          <input id="terms" type="checkbox" class="checkbox-input" />
+          <label for="terms" class="terms-label">
+            I agree to the <a href="/policies" class="link-inline">Terms of Service</a> and <a href="/policies" class="link-inline">Privacy Policy</a>
+          </label>
+        </div>
+        
+        <button type="button"
+        class="btn-primary"
+        onclick="submitStep1(this)">
+    Continue
+</button>
+        
+        
+        <div class="sso-section">
+          <p class="sso-text">Or continue with</p>
+          <div class="sso-buttons">
+            <button type="button" class="btn-sso">GitHub</button>
+            <a href="/oauth2/authorization/google" class="btn-sso"><button type="button" class="btn-sso" >   Google</button></a>
+          </div>
+        </div>
+        
+        <p id="note" class="note-text">✓ Your data is secure and encrypted.</p>
+      </form>
+      </div>
+      <!-- STEP 2 -->
+       <form>
+    <div id="step2" class="step-content hidden">
+
+        <h2 class="form-title">Verify OTP</h2>
+
+        <p class="description">
+            Enter the OTP sent to your email address.
+        </p>
+
+        <div class="otp-inputs">
+            <input class="otp-box" maxlength="1">
+            <input class="otp-box" maxlength="1">
+            <input class="otp-box" maxlength="1">
+            <input class="otp-box" maxlength="1">
+        </div>
+
+        <div class="otp-buttons">
+            <button type="button"
+                class="btn-sso"
+                onclick="prevStep()">
+                Back
+            </button>
+            
+            <button type="button"
+        class="btn-primary"
+        onclick="validateStep2()">
+    Verify & Create Account
+</button>
+        </div>
+      
+     
+      
+      
+    </section>
+  </main>
+</body>
+		<script>
+								
+								
+								
+								
+								// Global User ID
+let currentUserId = null;
+
+/**
+ * Show Step
+ */
+function showStep(stepNumber) {
+
+    document.querySelectorAll('.step-content').forEach(step => {
+        step.classList.remove('active');
+        step.classList.add('hidden');
+    });
+
+    const currentStep = document.getElementById('step' + stepNumber);
+
+    currentStep.classList.remove('hidden');
+    currentStep.classList.add('active');
+
+    document.querySelectorAll('.step-indicator').forEach((ind, index) => {
+
+        ind.classList.remove('active');
+
+        if ((index + 1) === stepNumber) {
+            ind.classList.add('active');
+        }
+    });
+}
+
+/**
+ * Back Button
+ */
+function prevStep() {
+    showStep(1);
+}
+
+/**
+ * Step 1 - Generate OTP
+ */
+function submitStep1(btn) {
+
+    const company = document.getElementById("company").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const confirm = document.getElementById("confirm").value;
+
+    if (company === "") {
+        alert("Please enter company name");
+        return;
+    }
+
+    if (email === "") {
+        alert("Please enter email");
+        return;
+    }
+
+    if (password === "") {
+        alert("Please enter password");
+        return;
+    }
+
+    if (password !== confirm) {
+        alert("Passwords do not match");
+        return;
+    }
+
+    if (!document.getElementById("terms").checked) {
+        alert("Please accept Terms & Conditions");
+        return;
+    }
+
+    const form = document.getElementById("step1Form");
+    const formData = new FormData(form);
+
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "Sending OTP...";
+
+    fetch("/generatedOtp", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        if (data.status === "OTP_SENT") {
+
+            currentUserId = data.userid;
+
+            alert("OTP sent successfully to your email.");
+
+            showStep(2);
+
+        } else if (data.status === "EMAIL_NULL") {
+
+            alert("Please enter a valid email.");
+
+        } else {
+
+            alert("Something went wrong.");
+        }
+
+    })
+    .catch(error => {
+
+        console.error(error);
+        alert("Server error.");
+
+    })
+    .finally(() => {
+
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+
+    });
+}
+
+/**
+ * Step 2 - Verify OTP
+ */
+function validateStep2() {
+
+    const otpBoxes = document.querySelectorAll('.otp-box');
+
+    let otpValue = "";
+
+    otpBoxes.forEach(box => {
+        otpValue += box.value;
+    });
+
+    if (otpValue.length !== 4) {
+        alert("Please enter 4 digit OTP");
+        return;
+    }
+
+    fetch(`/verifyOtp?userid=${currentUserId}&userotp=${otpValue}`, {
+        method: "POST"
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        if (data.status === "VERIFIED") {
+
+            alert("Registration Successful!");
+
+            window.location.href = "/loginpage";
+
+        } else {
+
+            alert("Invalid OTP");
+
+            otpBoxes.forEach(box => {
+                box.value = "";
+            });
+
+            otpBoxes[0].focus();
+        }
+
+    })
+    .catch(error => {
+
+        console.error(error);
+
+        alert("Verification failed.");
+
+    });
+}
+
+/**
+ * OTP Auto Focus
+ */
+document.addEventListener("DOMContentLoaded", () => {
+
+    const otpBoxes = document.querySelectorAll(".otp-box");
+
+    otpBoxes.forEach((box, index) => {
+
+        box.addEventListener("input", () => {
+
+            if (box.value.length === 1 && index < otpBoxes.length - 1) {
+                otpBoxes[index + 1].focus();
+            }
+
+        });
+
+        box.addEventListener("keydown", (e) => {
+
+            if (
+                e.key === "Backspace" &&
+                box.value === "" &&
+                index > 0
+            ) {
+                otpBoxes[index - 1].focus();
+            }
+
+        });
+
+    });
+
+});
+			
+				
+				</script>
+				
+				
+				
+
+
+
+
+</html>
