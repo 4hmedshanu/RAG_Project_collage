@@ -33,6 +33,7 @@ public class websecrity {
                     "/imag/**",
                     "/landingpage",
                     "/",
+                    "/about",
                     "/faq",
                     "/submiting",
                     "/generatedOtp",
